@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: crypto-market-monitor
+  profiles:
+    default: local
+  datasource:
+    url: jdbc:mysql://${DB_HOST:127.0.0.1}:${DB_PORT:3306}/${DB_NAME:crypto_market_monitor}?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true
+    username: ${DB_USER:crypto_app}
+    password: ${DB_PASSWORD}
+    hikari:
+      connection-timeout: 5000
+      maximum-pool-size: 5
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+
+server:
+  address: ${SERVER_ADDRESS:127.0.0.1}
+  port: ${SERVER_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
+# HTTP取得の初期値。合計処理時間の上限ではなく接続/読取り待ちの制限。
+market-monitor:
+  collection:
+    enabled: ${COLLECTION_ENABLED:true}
+    fixed-delay: ${COLLECTION_FIXED_DELAY:60s}
+    shutdown-wait: ${COLLECTION_SHUTDOWN_WAIT:30s}
+  coinbase:
+    connect-timeout: ${COINBASE_CONNECT_TIMEOUT:3s}
+    read-timeout: ${COINBASE_READ_TIMEOUT:5s}

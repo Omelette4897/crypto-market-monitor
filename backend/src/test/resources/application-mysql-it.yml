@@ -1,0 +1,19 @@
+# 自動HTTP収集は無効化する。起動時回収は有効のまま、専用DBだけを対象にする。
+market-monitor:
+  collection:
+    enabled: false
+# このプロファイルはテストクラスが有効化する。localの.envを読み込まない。
+# 接続先は@DynamicPropertySourceでTestcontainersの値だけを登録する。
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 3
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
