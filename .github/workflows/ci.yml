@@ -42,6 +42,10 @@ jobs:
       # verifyの中で通常テスト→JAR作成→DB結合テストを実行し、失敗をそのままCI失敗とする。
       - name: Test and build backend with MySQL integration tests
         run: ./mvnw --batch-mode --no-transfer-progress -Pmysql-it -DfailIfNoTests=true verify
+      # 配信用イメージの構築だけを検証する。レジストリ送信・デプロイは行わない。
+      - name: Build production Docker image with bundled web tests
+        working-directory: .
+        run: docker build --tag crypto-market-monitor:ci .
 
   frontend:
     name: Frontend

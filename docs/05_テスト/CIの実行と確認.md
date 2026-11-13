@@ -52,7 +52,9 @@ CI成功はmainへの取り込みを技術的に禁止/許可する設定では�
 
 ローカルはWindows、CIはLinux。依存をクリーンインストールする`npm ci`はnode_modulesを作り直すため、開発PCではViteを停止するか検証用コピーで実行する。DB試験にはDocker Engineが必要で、Docker Desktopを用いる開発DBのCompose起動とは別である。
 
-2026-11-13のローカル検証：Backend通常211件・JAR作成成功。Frontendは検証用コピーで`npm ci`、133件・型チェック込みビルド成功。Codex環境ではDocker名前付きパイプへのアクセスが拒否され、実MySQL試験はローカル未実行。GitHubでの初回CIは実行前。結果を確認後に本節を更新する。
+2026-11-13：PR #1とmainコミットc41c252のCI成功を確認。通常211件＋実MySQL54件、Frontend133件と双方ビルド成功。
+
+Railway準備でBackendジョブにルートの`docker build`を追加した。Dockerfile内でVueビルド、通常JUnitと`web-bundle`配信試験、JREイメージ構築を検証し、イメージ送信・自動デプロイはしない。変更後のGitHub CIは未実行。Codex側はDocker接続拒否だが、ユーザー実行の実MySQL54件成功を更新XMLで確認し、Dockerイメージ作成と非root設定をinspect出力で確認した。通常211件・同梱5件・Frontend133件/ビルドも成功。実コンテナ起動・本番ST/UATは未実施。
 
 ## 参照した公式情報
 
