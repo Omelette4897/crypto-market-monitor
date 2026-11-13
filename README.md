@@ -53,6 +53,10 @@ Windows PowerShellで操作します。JDK 21、対応するNode.js（今回の�
 
 通常テストではUT・模擬HTTP・MockMvc・Spring起動/終了制御を確認します。DB結合テストはDocker Desktopを起動し、backendで`.\mvnw.cmd -Pmysql-it verify`を実行します。Testcontainersの専用MySQLを使い、開発DBは使いません。これらの自動試験は実Coinbaseへ通信しません。実接続試験は別途明示実行します。
 
+## CI
+
+PRとmain更新時にBackend（通常・実MySQLテストとJAR作成）とFrontend（テスト・型チェック・ビルド）を検証します。設定追加済みで、初回のGitHub実行結果は未確認です。[CIの実行と確認](docs/05_テスト/CIの実行と確認.md)を参照してください。
+
 ## 方針と設計
 
 最新価格・収集実行履歴・24時間履歴分析の3 APIを提供します。Mid/Spreadチャートと期間内全観測のスプレッド平均/最大/最小を表示し、30秒ごとに保存済みデータを再取得します。Chart.jsとdecimal.jsを利用し、実売買は行いません。
