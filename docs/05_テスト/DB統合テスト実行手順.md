@@ -1,6 +1,6 @@
 # DB統合テストの実行手順
 
-2026-11-09追記：mysql-itプロファイルはCollectionPersistenceIT（B21件＋Dの回収4件・実DB終了順序1件）とQueryApiIT（C25件）の計51件を実行する。D-DB-05ではSpring標準Schedulerの停止待機中も実MySQLへのSELECTが成功し、収集完了後に接続プールが閉じることを確認する。どちらも実Coinbaseへ接続しない。application-mysql-it.ymlで自動収集を無効化するが起動時回収は行う。固定時計は起動時から使えるTestBeanで供給する。手順は[参照APIの動作確認](参照APIの動作確認.md)・[定期実行の動作確認](定期実行の動作確認.md)を参照。
+更新：2026-11-14。mysql-itはCollectionPersistenceIT（保存・回収・終了順序）とQueryApiIT（最新価格・収集履歴・24時間履歴/集計）を実行する。実MySQLとSpringを使い、実Coinbaseには接続しない。テスト専用接続を動的に注入し、開発DBや.envは使わない。最新の件数・結果は[CI記録](CIの実行と確認.md)を参照。
 
 ## 対象と必要なもの
 
