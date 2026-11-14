@@ -119,6 +119,28 @@ abbr[title] { text-decoration: underline dotted #94a3b8; text-underline-offset: 
 .about-app-body { display: grid; gap: 8px; margin-top: 12px; line-height: 1.8; max-width: 850px; }
 .about-app a { color: #0f766e; text-decoration: underline; text-underline-offset: 3px; }
 @media (max-width: 767px) {
-  .market-overview-table .expansion-candidate .mobile-column-label { display: none; }
-  .market-overview-table .expansion-candidate { padding: 8px 10px; gap: 4px 12px; }
+  /* 各市場は「市場名＋状態」「価格＋スプレッド」の2行。DOMの読み順は表のまま保つ。 */
+  .market-overview-table tbody { display: grid; gap: 6px; }
+  .market-overview-table tbody tr { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-areas: "market market market status" "price price spread spread"; gap: 5px 10px; padding: 9px 10px; }
+  .market-overview-table tbody th { grid-area: market; display: flex; align-items: center; gap: 5px; padding: 0; min-width: 0; white-space: nowrap; }
+  .market-overview-table tbody th > span:first-child { font-size: 10px; overflow: hidden; text-overflow: ellipsis; }
+  .market-overview-table .market-select-button { flex-shrink: 0; padding: 0; font-size: 12px; }
+  .market-overview-table .selected-market-label { display: none; }
+  .market-overview-table td { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 5px; padding: 0; font-size: 12px; }
+  .market-overview-table td:nth-child(2) { grid-area: price; }
+  .market-overview-table td:nth-child(3) { grid-area: spread; justify-content: flex-end; }
+  .market-overview-table td:last-child { grid-area: status; justify-content: flex-end; align-items: center; }
+  .market-overview-table td:last-child .mobile-column-label { display: none; }
+  .market-overview-table .mobile-column-label { margin: 0; font-size: 9px; }
+  .market-overview-table .overview-price { display: inline; font-size: clamp(11px, 3.5vw, 14px); }
+  .market-overview-table td:nth-child(3) > .text-slate-600 { display: none; }
+  .market-overview-table td:nth-child(3) > span { font-size: 10px; }
+  .market-overview-table .status-badge { padding: 1px 5px; font-size: 10px; }
+  .quote-sides .quote-side { padding-left: 8px; font-size: 11px; }
+  .quote-sides .quote-price { font-size: clamp(15px, 4.6vw, 24px); line-height: 1.5; overflow-wrap: anywhere; }
+  /* 統計は各指標を1行の「項目：値」にして、狭い画面でも桁を欠落させない。 */
+  .spread-statistics > div { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .spread-statistics .metric-label { margin: 0; font-size: 11px; }
+  .spread-statistics .metric-label::after { content: "："; }
+  .spread-statistics .summary-value { text-align: right; font-size: 13px; }
 }
