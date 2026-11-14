@@ -21,7 +21,7 @@ const quoteMetrics = computed(() => selectedQuote.value ? calculateQuoteMetrics(
           <p><abbr title="同じ市場の売気配と買気配の差額">Bid/Ask Spread</abbr> <span class="spread-value">{{ quoteMetrics ? formatDecimal(quoteMetrics.spread) + ' USD' : '—' }}</span>
             <span class="ml-2 font-mono">{{ quoteMetrics ? formatSpreadRate(quoteMetrics.spreadRate) : '' }}</span></p></div>
         <p v-if="!quoteMetrics" class="error-notice" role="alert">価格の整合性を確認できないため、Mid・スプレッドを計算できません。</p>
-        <dl class="grid gap-4 sm:grid-cols-2">
+        <dl class="quote-sides grid grid-cols-2 gap-3 sm:gap-4">
           <div class="quote-side border-l-2 border-teal-600"><dt><abbr title="現在の最良買気配（買い注文の最高価格）">Best Bid</abbr> ({{ currencyUnits(market.symbol).quote }})</dt><dd class="quote-price" :title="selectedQuote.bidPrice">{{ formatDecimal(selectedQuote.bidPrice) }}</dd>
 </div>
           <div class="quote-side border-l-2 border-sky-600"><dt><abbr title="現在の最良売気配（売り注文の最低価格）">Best Ask</abbr> ({{ currencyUnits(market.symbol).quote }})</dt><dd class="quote-price" :title="selectedQuote.askPrice">{{ formatDecimal(selectedQuote.askPrice) }}</dd>

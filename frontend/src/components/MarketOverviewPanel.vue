@@ -23,16 +23,16 @@ const marketRows = computed(() => props.markets.map(market => {
       <tbody><tr v-for="row in marketRows" :key="`${row.market.exchange}:${row.market.symbol}`" @click="emit('selectMarket', row.market)" :aria-selected="row.market.exchange === selectedMarket.exchange && row.market.symbol === selectedMarket.symbol">
         <th scope="row"><span class="block text-xs font-normal text-slate-500">{{ exchangeLabel(row.market.exchange) }}</span><button type="button" class="market-select-button" :aria-label="`${exchangeLabel(row.market.exchange)} / ${row.market.symbol}を選択`" :aria-pressed="row.market.exchange === selectedMarket.exchange && row.market.symbol === selectedMarket.symbol" @click.stop="emit('selectMarket', row.market)">{{ row.market.symbol }}</button>
           <span class="selected-market-label" :class="{ invisible: row.market.exchange !== selectedMarket.exchange || row.market.symbol !== selectedMarket.symbol }" :aria-hidden="row.market.exchange !== selectedMarket.exchange || row.market.symbol !== selectedMarket.symbol">選択中</span></th>
-        <td><span class="mobile-column-label">Mid Price (USD)</span><span class="overview-price">{{ row.metrics ? formatDecimal(row.metrics.midPrice) : '—' }}</span><span v-if="!row.quote" class="block text-xs text-slate-500">{{ state.errorMessage ? '取得失敗' : state.lastSucceededAt ? '未観測' : '取得中' }}</span><span v-if="row.quote && !row.metrics" class="block text-xs text-rose-800">価格不整合</span></td>
-        <td><span class="mobile-column-label">Bid/Ask Spread</span><span class="block font-mono font-semibold">{{ row.metrics ? formatDecimal(row.metrics.spread) + ' USD' : '—' }}</span>
+        <td><span class="mobile-column-label">Mid (USD)</span><span class="overview-price">{{ row.metrics ? formatDecimal(row.metrics.midPrice) : '—' }}</span><span v-if="!row.quote" class="block text-xs text-slate-500">{{ state.errorMessage ? '取得失敗' : state.lastSucceededAt ? '未観測' : '取得中' }}</span><span v-if="row.quote && !row.metrics" class="block text-xs text-rose-800">価格不整合</span></td>
+        <td><span class="mobile-column-label">Spread</span><span class="block font-mono font-semibold">{{ row.metrics ? formatDecimal(row.metrics.spread) + ' USD' : '—' }}</span>
           <span class="text-xs text-slate-600">{{ row.metrics ? formatSpreadRate(row.metrics.spreadRate) : '' }}</span></td>
         <td><span class="mobile-column-label">取得状態</span><span class="status-badge">{{ state.errorMessage ? '取得エラー' : row.quote ? '保存済み' : state.isLoading ? '取得中' : '未観測' }}</span></td>
       </tr>
       <!-- 候補の選択は未収集案内の表示だけ。実データやAPI取得対象へ混ぜない。 -->
       <tr v-for="candidate in expansionCandidates" :key="`candidate:${candidate.exchange}:${candidate.symbol}`" class="expansion-candidate" @click="emit('selectMarket', candidate)" :aria-selected="candidate.exchange === selectedMarket.exchange && candidate.symbol === selectedMarket.symbol">
         <th scope="row"><span class="block text-xs font-normal">{{ candidate.exchangeName }}</span><button type="button" class="market-select-button" :aria-label="`${candidate.exchangeName} / ${candidate.symbol}を選択`" :aria-pressed="candidate.exchange === selectedMarket.exchange && candidate.symbol === selectedMarket.symbol" @click.stop="emit('selectMarket', candidate)">{{ candidate.symbol }}</button><span class="selected-market-label" :class="{ invisible: candidate.exchange !== selectedMarket.exchange || candidate.symbol !== selectedMarket.symbol }" :aria-hidden="candidate.exchange !== selectedMarket.exchange || candidate.symbol !== selectedMarket.symbol">選択中</span></th>
-        <td><span class="mobile-column-label">Mid Price (USD)</span>—</td>
-        <td><span class="mobile-column-label">Bid/Ask Spread</span>—</td>
+        <td><span class="mobile-column-label">Mid (USD)</span>—</td>
+        <td><span class="mobile-column-label">Spread</span>—</td>
         <td><span class="mobile-column-label">取得状態</span><span class="status-badge">拡張候補</span></td>
       </tr></tbody>
     </table>
