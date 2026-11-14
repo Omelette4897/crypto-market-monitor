@@ -1,78 +1,122 @@
 # Crypto Market Monitor
 
-取引所・通貨ペアごとの公開市場データを収集し、価格とBid/Askスプレッドの推移・統計を確認するWebアプリケーション。現在の収集対象はCoinbase Exchange / BTC-USDの1市場。実際の売買・資金移動は行いません。
+暗号資産取引所の市場データを定期収集・蓄積し、最新価格・直近24時間の価格推移・Bid/Askスプレッド統計を表示するWebアプリです。現在は **Coinbase Exchange / BTC-USDの1市場**を収集しています。実際の売買・裁定取引は行いません。
 
-[公開デモ：暗号資産 市場モニター](https://app-production-d13c7e57.up.railway.app/)
+**[公開デモ：暗号資産 市場モニター](https://app-production-d13c7e57.up.railway.app/)** · [CI結果](https://github.com/Omelette4897/crypto-market-monitor/actions/workflows/ci.yml) · [資料一覧](docs/資料一覧.md)
 
-保存済みデータを表示します。収集停止中は観測が古くなり、直近24時間に観測がない場合はチャートが空になります。
+デモは停止する場合があります。停止中は収集されず、再開後も欠測を補間しません。画面の更新は保存済みデータの再取得です。
 
-## 現在の実装範囲
+![PC版：Coinbase BTC-USDの最新価格・24時間推移・スプレッド統計](assets/screenshots/dashboard-desktop.png)
 
-2026-11-12：価格取得・保存・参照API・定期収集とVue業務画面を実装しました。画面構成は受入れ確認済みです。
+<details>
+<summary>スマートフォン表示</summary>
 
-- Spring Boot 3.5.16 / Java 21 / Maven Wrapper。
-- Vue 3 / TypeScript / Tailwind CSS / Viteによる最新保存価格・24時間推移・スプレッド分析・収集状況のダッシュボード。
-- MySQLのCompose設定、ローカル資格情報の生成、JPA/Flywayの接続設定。
-- `/actuator/health`による接続確認。詳細情報や環境情報は公開しません。
-- Coinbase BTC-USDのBid/Ask・数量の検証、共通形式への変換、実行履歴・価格観測の保存。
-- 最新価格・収集実行履歴と、24時間の観測/スプレッド統計を返す3 GET API。
-- 起動時の中断回収、初回即時・処理終了から60秒後の定期収集、正常終了時の最大30秒待機。
+<img src="assets/screenshots/dashboard-mobile.png" alt="スマートフォン版：市場一覧・最新価格・推移チャート" width="375">
 
-2026-11-14にRailwayへ初回公開し、HTTPS配信・3参照API・実Coinbaseの定期収集/DB保存、PCの基本操作を確認しました。モバイル調整はローカルで受入れ済み、本番反映は準備中です。再起動・障害復旧・バックアップ復元などの運用確認は継続中です。[確認結果と未実施事項](docs/05_テスト/本番配信・ST_UAT確認.md)を参照してください。画面から外部収集は開始せず、保存済みデータを参照します。
+</details>
 
-## 起動
+撮影：2026-11-14。公開アプリの実データで、価格・観測件数は撮影時点のものです。
 
-Windows PowerShellで操作します。JDK 21、対応するNode.js（今回の検証は24.18.0）、起動済みのDocker Desktopが必要です。Maven・MySQLの単体インストールは不要です。
+## 主な機能
 
-1. このフォルダで `node scripts/init-local-env.mjs` を実行。
-2. `docker compose up -d --wait` でMySQLを起動。
-3. 別のPowerShellで `cd backend` → `.\mvnw.cmd spring-boot:run`。
-4. もう1つのPowerShellで `cd frontend` → `npm.cmd ci` → `npm.cmd run dev`。
-5. ブラウザで <http://127.0.0.1:5173/> を開く。表示を再取得する場合は「表示更新」を押す。
+- CoinbaseのLevel 1注文板からBest Bid / Ask・数量を取得し、検証後にMySQLへ保存。
+- 起動時の未完了収集回復と、前回処理終了から60秒後の定期収集。
+- 最新価格、収集実行履歴、24時間の価格履歴・スプレッド統計を返す3つのGET API。
+- Mid Price / Spread切替チャート、鮮度警告、収集履歴の展開・ページ送り。
+- 30秒間隔の画面更新。領域ごとの通信失敗を表示し、最後に取得できた値を保持。
 
-最新保存価格と収集実行履歴を、ブラウザ→Vite→Spring Boot→MySQLの経路で取得します。詳細は[業務画面の動作確認](docs/05_テスト/業務画面の動作確認.md)を参照してください。初回は依存やMySQLイメージのダウンロードに時間がかかります。
+一覧のCoinbase ETH-USD / Kraken BTC-USDは表示上の拡張候補です。選択すると未収集と案内し、架空の価格や候補市場へのAPI通信は発生させません。
 
-バックエンドを通常起動すると実Coinbaseから自動収集し、DBへ保存します。`COLLECTION_ENABLED=false`で自動収集を無効化できますが、残存RUNNINGの起動時回収は実行します。同じDBに対するバックエンドは1プロセスにしてください。APIと定期収集の確認方法は[定期実行の動作確認](docs/05_テスト/定期実行の動作確認.md)を参照してください。
+## 技術スタック
 
-詳しいコマンド、停止方法、よくあるエラーは[ローカル起動手順](docs/04_開発環境/ローカル起動手順.md)を参照してください。
+| 領域 | 技術と役割 |
+|---|---|
+| バックエンド | Java 21 / Spring Boot 3.5.16：REST API、RestClientによる外部取得、TaskSchedulerによる定期実行 |
+| データ保存 | MySQL 8.4.13 / Spring Data JPA：保存・検索・集計、Flyway：スキーマ管理 |
+| フロントエンド | Vue 3 / TypeScript / Vite / Tailwind CSS：画面・状態管理、Chart.js：推移表示、decimal.js：十進計算 |
+| テスト | JUnit / Mockito / MockMvc / Testcontainers、Vitest / Vue Test Utils |
+| ビルド・運用 | Maven Wrapper / Docker / GitHub Actions CI、Railway：App・MySQL・永続Volume |
 
-## 構成
+## システム構成
 
-```text
-ブラウザ → Vite :5173 → Spring Boot :8080 → MySQL :3306
-                         ├ 管理・参照API
-                         └ 定期収集 → Coinbase公開API
+```mermaid
+flowchart LR
+  Browser[ブラウザ / Vue] -->|HTTPS| App[Railway App / Spring Boot<br/>Vue静的配信・REST API・定期収集]
+  App -->|private network / JPA・JDBC| DB[(MySQL / 永続Volume)]
+  App -->|定期GET / RestClient| Coinbase[Coinbase Exchange 公開API]
 ```
 
-- `frontend/`：ブラウザ側の画面と開発サーバー設定。
-- `backend/`：Javaアプリ、依存管理、DB接続設定、起動テスト。
-- `compose.yaml`：開発用MySQLとデータvolume。
-- `.env`：生成されたローカル資格情報。Git管理対象外。
-- `docs/`：要件、基本設計、API、公開計画、起動手順。
+本番はVueをJARへ同梱し、画面とAPIをSpring Bootから配信します。ローカル開発ではVite（5173番）がAPIをSpring Boot（8080番）へ転送し、MySQLだけをDocker Composeで起動します。収集と画面の参照は独立しています。[構成・データフロー](docs/02_基本設計/アーキテクチャ概要.md)
 
-## ビルドとテスト
+## 設計上の工夫
 
-バックエンド：backendで `.\mvnw.cmd verify`。
-フロント：frontendで `npm.cmd ci`、`npm.cmd test`、`npm.cmd run build`。ビルドは型チェックを含みます。
+| 課題 | 採用した設計・根拠 |
+|---|---|
+| 外部通信待ちでDBトランザクションを長く保持しない | 開始履歴を先にcommitし、HTTP取得をTx外で実行。観測INSERTとSUCCESS更新を同一Txで確定。[保存Service](backend/src/main/java/com/example/cryptomonitor/collection/service/CollectionPersistenceService.java) |
+| 保存結果不明時に確定済みの成功を壊さない | 完了更新はRUNNINGを条件とする。commit応答喪失後のFAILED記録でもSUCCESSを上書きしない。[保存・ロールバック試験](backend/src/test/java/com/example/cryptomonitor/collection/service/CollectionPersistenceIT.java) |
+| 起動時回復と新規収集の競合を避ける | 回復Txのcommit後に収集を登録。Spring標準Schedulerと終了ライフサイクルで直列実行・停止待機を制御。[起動Runner](backend/src/main/java/com/example/cryptomonitor/collection/startup/CollectionStartupRunner.java)・[ライフサイクル試験](backend/src/test/java/com/example/cryptomonitor/collection/scheduler/CollectionLifecycleTest.java) |
+| 価格精度と観測時刻の意味を維持する | BigDecimal / DECIMAL(30,12)、JSON数値文字列、Instant / UTC、DB保存時のみマイクロ秒へ切捨て。提供元時刻を受信時刻で補わない。[共通観測](backend/src/main/java/com/example/cryptomonitor/market/model/MarketObservation.java) |
+| グラフ上限と統計の母集団を混同しない | 最新2,000件と24時間全観測のDB集計を同一REPEATABLE_READの参照Txで取得。関連はfetch joinで取得しN+1を避ける。[履歴検索Service](backend/src/main/java/com/example/cryptomonitor/market/service/QuoteHistoryQueryService.java) |
 
-通常テストではUT・模擬HTTP・MockMvc・Spring起動/終了制御を確認します。DB結合テストはDocker Desktopを起動し、backendで`.\mvnw.cmd -Pmysql-it verify`を実行します。Testcontainersの専用MySQLを使い、開発DBは使いません。これらの自動試験は実Coinbaseへ通信しません。実接続試験は別途明示実行します。
+代替案・制約・対応するテストは[主要な設計判断](docs/02_基本設計/主要な設計判断.md)にまとめています。
 
-## CI
+## テスト・CI
 
-PRとmain更新時にBackend（通常・実MySQLテストとJAR作成、Vue同梱試験を含む本番Dockerイメージ構築）とFrontend（テスト・型チェック・ビルド）を検証します。PR #2とmain取り込み後のCI成功を確認済みです。デプロイやイメージ送信は行いません。[CIの実行と確認](docs/05_テスト/CIの実行と確認.md)を参照してください。
+| 種類 | 実体・検証対象 |
+|---|---|
+| JUnit / Mockito・模擬HTTP / MockMvc | 価格検証、通信エラー、収集進行、JSON契約、Spring起動・終了制御。通常試験は実Coinbase・DBへ接続しない |
+| Testcontainers | 専用MySQLでFlyway、制約、commit / rollback、検索・集計、回復・終了時のDB存続を検証 |
+| Vitest / Vue Test Utils | 計算・書式、応答検証、タイマー・部分失敗、画面操作。実ブラウザのレイアウト試験とは別 |
+| Vue同梱配信 / Docker build | 本番ビルドしたHTML・JS・CSSとAPIの共存、Linuxマルチステージイメージ構築 |
 
-## 方針と設計
+PR作成・更新とmain更新時にBackend / Frontendの2ジョブを実行します。**CIはイメージ構築までで、レジストリ送信・デプロイ・自動マージは行いません。** [CI手順と確認済み実績](docs/05_テスト/CIの実行と確認.md)
 
-最新価格・収集実行履歴・24時間履歴分析の3 APIを提供します。Mid/Spreadチャートと期間内全観測のスプレッド平均/最大/最小を表示し、30秒ごとに保存済みデータを再取得します。Chart.jsとdecimal.jsを利用し、実売買は行いません。
-本番はRailway HobbyのApp＋永続MySQLを採用しています。DockerでVueをJARへ同梱し、Spring Bootから画面とAPIを配信します。初回公開済み、本番ST/UAT・運用確認は継続中です。[Railway操作手順](docs/06_リリース・運用/Railwayデプロイ・運用手順.md)に設定・単一起動を守る手動更新・停止/解約をまとめています。Bootのサポート版と依存関係の継続的な再評価は別の保守タスクとして扱います。
+公開環境ではPC・スマートフォンの基本操作、定期収集、App / MySQL停止・再開後のデータ保持を確認しています。通信障害の全シナリオ、長時間負荷、全ブラウザ、実行中の強制終了を網羅したものではありません。[ST/UAT結果・未確認事項](docs/05_テスト/本番配信・ST_UAT確認.md)
 
-- [要件](docs/01_要件定義/要件定義.md)
-- [基本設計](docs/02_基本設計/基本設計.md)
-- [業務APIの契約](docs/02_基本設計/API基本設計.md)
-- [公開計画](docs/06_リリース・運用/公開構成・デプロイ設計.md)
-- [現行資料の一覧](docs/資料一覧.md)
+## ローカル起動
 
-## 開発構成を確認する
+JDK 21、Node.js（CIは24系、対応範囲は[package.json](frontend/package.json)）、Docker Engine / Composeが必要です。Maven・MySQLの個別インストールは不要です。
 
-- [現行資料の一覧](docs/資料一覧.md)：要件・設計・実行手順の入口。
-- [開発環境とIDEの操作](docs/04_開発環境/開発環境とIDEの操作.md)：IntelliJでJava、VS CodeでVueを扱う現行手順。
+```sh
+# リポジトリ直下：ローカル資格情報を生成し、MySQLを起動
+node scripts/init-local-env.mjs
+docker compose up -d --wait
+
+# 別ターミナル：バックエンド
+cd backend
+./mvnw spring-boot:run
+
+# さらに別ターミナル：フロントエンド
+cd frontend
+npm ci
+npm run dev
+```
+
+[http://127.0.0.1:5173/](http://127.0.0.1:5173/)を開きます。Windows PowerShellでは`./mvnw`を`.\mvnw.cmd`、`npm`を`npm.cmd`へ読み替えます。[IDE・停止・トラブル対応](docs/04_開発環境/ローカル起動手順.md)
+
+通常起動は実Coinbaseへ接続して保存します。`COLLECTION_ENABLED=false`で収集は無効化できますが、起動時回復は行います。同じDBを使うバックエンドは1プロセスにしてください。生成した`.env`はGit管理対象外です。
+
+テストはbackendで`./mvnw verify`、Docker利用時は`./mvnw -Pmysql-it verify`。frontendで`npm test`と`npm run build`（型チェック込み）を実行します。
+
+## 詳細ドキュメント
+
+| 確認したいこと | 資料 |
+|---|---|
+| 全体像・主要フロー | [アーキテクチャ概要](docs/02_基本設計/アーキテクチャ概要.md) |
+| 採用理由・トレードオフ・実装根拠 | [主要な設計判断](docs/02_基本設計/主要な設計判断.md) |
+| 対象範囲 / DB・状態 / JSON契約 | [要件](docs/01_要件定義/要件定義.md)・[基本設計](docs/02_基本設計/基本設計.md)・[API](docs/02_基本設計/API基本設計.md) |
+| 機能別クラス・画面・テスト | [資料一覧](docs/資料一覧.md) |
+| 本番構成・費用・更新・停止 | [デプロイ設計](docs/06_リリース・運用/公開構成・デプロイ設計.md)・[運用手順](docs/06_リリース・運用/Railwayデプロイ・運用手順.md) |
+
+## 制限・今後の構想
+
+- 実収集は1市場のみ。スプレッドは同一市場のAsk−Bidであり、取引所間の裁定利益ではありません。
+- 観測時刻はHTTP本文受信完了時刻です。提供元時刻`sourceAt`はnullで、真の市場鮮度を保証しません。
+- 単一App / DB前提。更新は旧App停止完了後に新Appを起動し、短時間の停止を許容します。分散排他・無停止更新は未実装です。
+- 履歴検索は一覧上限を設けていますが、DB走査量の上限ではありません。大量蓄積時の索引・保存期間・性能評価は今後の課題です。
+- バックアップ・復元試験はPhase 1の対象外です。データ消失時は新規収集から再開し、過去の観測は復元できません。
+- 複数市場の実収集・比較、手数料を考慮した裁定候補検出は今後の構想です。
+
+## 開発について
+
+設計検討・実装・テスト・資料整備にCodex等のAI支援を利用しています。重要な仕様と採用判断を開発者が確認し、生成物はコードレビュー・自動テスト・実環境確認で検証しています。各試験の保証範囲と未確認事項は資料に明示しています。
