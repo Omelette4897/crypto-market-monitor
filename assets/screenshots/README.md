@@ -4,10 +4,10 @@
 
 | ファイル | 内容 | 画像サイズ |
 |---|---|---|
-| [dashboard-desktop.png](dashboard-desktop.png) | PC版のダッシュボード全体 | 1028 × 1948 px |
+| [dashboard-desktop.png](dashboard-desktop.png) | PC版のダッシュボード全体 | 1900 × 1836 px |
 | [dashboard-mobile.png](dashboard-mobile.png) | スマートフォン表示（高密度画像） | 750 × 3388 px |
 
-画像ピクセル幅とCSSの表示幅は異なる。スマホ画像はREADMEで幅375pxに表示する。PC画像には右側・下部の余白が多く含まれる。架空の価格・合成UI・旧レイアウトの画像で代用しない。
+画像ピクセル幅とCSSの表示幅は異なる。スマホ画像はREADMEで幅375pxに表示する。PC版は2026-11-14に撮り直し、ダッシュボード全体を収めた画像へ差し替えた。架空の価格・合成UI・旧レイアウトの画像で代用しない。
 
 ## 差し替え時の撮影手順
 
