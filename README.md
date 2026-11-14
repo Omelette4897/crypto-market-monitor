@@ -6,7 +6,16 @@
 
 デモは停止する場合があります。停止中は収集されず、再開後も欠測を補間しません。画面の更新は保存済みデータの再取得です。
 
-PC版・スマートフォン版（375px）の実画面は現在未掲載です。[実画面の撮影・配置手順](assets/screenshots/README.md)を用意しています。
+![PC版：Coinbase BTC-USDの最新価格・24時間推移・スプレッド統計](assets/screenshots/dashboard-desktop.png)
+
+<details>
+<summary>スマートフォン表示</summary>
+
+<img src="assets/screenshots/dashboard-mobile.png" alt="スマートフォン版：市場一覧・最新価格・推移チャート" width="375">
+
+</details>
+
+撮影：2026-11-14。公開アプリの実データで、価格・観測件数は撮影時点のものです。[撮影・差し替え手順](assets/screenshots/README.md)
 
 ## 技術スタック
 
