@@ -6,7 +6,7 @@
 
 既存のCollectionService.collectBtcUsdを自動実行し、開始前に前回残存したRUNNINGを回収する。単一バックエンドプロセスを前提とする。価格検証・保存の基本動作、参照API、DBスキーマは維持する。
 
-## 合意済みの動作
+## 動作仕様
 
 ```text
 Spring Boot起動・Flyway適用
@@ -25,7 +25,7 @@ Spring Boot起動・Flyway適用
 
 強制終了では正常停止処理が実行されないことがある。HTTPの接続3秒・読取り待ち5秒は総所要時間の上限ではなく、停止時の30秒の猶予とは別の設定。
 
-## 追加合意
+## 実行・停止の方針
 
 - 設定で収集を無効化できる。enabled=falseでも起動時回収は行い、初回/周期収集だけを開始しない。アプリ全体のDB書込みを完全禁止する設定ではない。
 - Coinbaseから429を受けたら既存のFAILED/RATE_LIMITED記録を使い、処理終了から通常の60秒後に次回収集する。即時再試行は行わない。Retry-Afterによる待機時間調整は今回実装しない。この仕様は画面→参照APIの通信制御ではない。
@@ -104,7 +104,7 @@ Flyway・JPA初期化
 
 個別ケース仕様はテストソースへ観点ID・日本語表示名・前提/入力・操作・期待結果として記載する。本書は設計と分担のみを示し、ケース仕様を二重管理しない。
 
-実装後は、回収→初回→周期継続、停止順序、異常系が合意どおりに動き、各試験とユーザーのコード確認が完了したことをもって機能DのDoneを判断する。
+回収→初回→周期継続、停止順序、異常系を各試験で確認する。確認済みの実績と未確認事項は、末尾の検証記録およびテスト資料を参照する。
 
 ## 検証状態
 
@@ -194,7 +194,7 @@ Context.close
 
 - main：CollectionSchedulingConfiguration、CollectionSchedulerの2クラス。
 - test：CollectionSchedulingConfigurationTest、CollectionSchedulerTest、CollectionLifecycleTest、CollectionPersistenceIT。
-- docs：本書、定期実行の動作確認、DB統合テスト実行手順、パッケージ構成、および内部開発進行ガイドの進捗。
+- docs：本書、定期実行の動作確認、DB統合テスト実行手順、パッケージ構成。
 
 ### 公式情報
 

@@ -2,7 +2,7 @@
 
 READMEの補助として、GitHubのAbout欄から概要・デモへ到達できるようにする。本書は設定案であり、管理画面の変更を実施済みとする記録ではない。
 
-2026-11-14の公開API確認では、HomepageはデモURLが設定済み、Topicsは空。Descriptionの冒頭は`ava / Spring Boot`となっていたため、次の修正を推奨する。
+2026-11-14の公開API確認では、DescriptionとHomepageは以下の推奨値が設定済み。Topicsは空のため、必要に応じて追加する。
 
 | 項目 | 推奨値 |
 |---|---|
@@ -15,4 +15,4 @@ READMEの補助として、GitHubのAbout欄から概要・デモへ到達でき
 3. Description・Website・Topicsを上記の内容へ設定して保存する。
 4. Codeタブへ戻り、概要・公開デモ・トピックリンクを確認する。
 
-個人的な経歴や制作動機は公開設定へ含めない。`portfolio`は任意だが、ここではアプリの内容と実装技術を示すTopicsを優先する。Descriptionの更新はコード・本番設定・公開URLを変更しない。
+Topicsはアプリの内容と実装技術を示す語を使う。Descriptionの更新はコード・本番設定・公開URLを変更しない。

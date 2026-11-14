@@ -35,7 +35,7 @@ GET /api/v1/collection-runs?limit=100
 GET /api/v1/collection-runs?exchange=COINBASE_EXCHANGE&symbol=BTC-USD&limit=20
 ```
 
-## 3. 応答の基本契約【合意済み】
+## 3. 応答の基本契約
 
 - 成功時はitems配列。0件・1件でも形を変えない。
 - idはJSON文字列。DBのBIGINT採番は維持する。
@@ -92,7 +92,7 @@ GET /api/v1/collection-runs?exchange=COINBASE_EXCHANGE&symbol=BTC-USD&limit=20
 SUCCESSのresultCode/resultDescriptionはnullとする実装既定。理由コードと公開説明の対応は履歴DTOへの変換処理に実装済み。
 失敗した実行履歴を正常に検索できた場合は200。履歴中のFAILEDをHTTPの500へ変換しない。
 
-## 4. データなし・エラー【合意済み】
+## 4. データなし・エラー
 
 | 状況 | HTTPステータス | 本文 |
 |---|---|---|

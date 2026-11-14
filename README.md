@@ -15,7 +15,17 @@
 
 </details>
 
-撮影：2026-11-14。公開アプリの実データで、価格・観測件数は撮影時点のものです。[撮影・差し替え手順](assets/screenshots/README.md)
+撮影：2026-11-14。公開アプリの実データで、価格・観測件数は撮影時点のものです。
+
+## 主な機能
+
+- CoinbaseのLevel 1注文板からBest Bid / Ask・数量を取得し、検証後にMySQLへ保存。
+- 起動時の未完了収集回復と、前回処理終了から60秒後の定期収集。
+- 最新価格、収集実行履歴、24時間の価格履歴・スプレッド統計を返す3つのGET API。
+- Mid Price / Spread切替チャート、鮮度警告、収集履歴の展開・ページ送り。
+- 30秒間隔の画面更新。領域ごとの通信失敗を表示し、最後に取得できた値を保持。
+
+一覧のCoinbase ETH-USD / Kraken BTC-USDは表示上の拡張候補です。選択すると未収集と案内し、架空の価格や候補市場へのAPI通信は発生させません。
 
 ## 技術スタック
 
@@ -32,21 +42,11 @@
 ```mermaid
 flowchart LR
   Browser[ブラウザ / Vue] -->|HTTPS| App[Railway App / Spring Boot<br/>Vue静的配信・REST API・定期収集]
-  App -->|private network / JPA| DB[(MySQL / 永続Volume)]
+  App -->|private network / JPA・JDBC| DB[(MySQL / 永続Volume)]
   App -->|定期GET / RestClient| Coinbase[Coinbase Exchange 公開API]
 ```
 
 本番はVueをJARへ同梱し、画面とAPIをSpring Bootから配信します。ローカル開発ではVite（5173番）がAPIをSpring Boot（8080番）へ転送し、MySQLだけをDocker Composeで起動します。収集と画面の参照は独立しています。[構成・データフロー](docs/02_基本設計/アーキテクチャ概要.md)
-
-## 主な機能
-
-- CoinbaseのLevel 1注文板からBest Bid / Ask・数量を取得し、検証後にMySQLへ保存。
-- 起動時の未完了収集回復と、前回処理終了から60秒後の定期収集。
-- 最新価格、収集実行履歴、24時間の価格履歴・スプレッド統計を返す3つのGET API。
-- Mid Price / Spread切替チャート、鮮度警告、収集履歴の展開・ページ送り。
-- 30秒間隔の画面更新。領域ごとの通信失敗を表示し、最後に取得できた値を保持。
-
-一覧のCoinbase ETH-USD / Kraken BTC-USDは表示上の拡張候補です。選択すると未収集と案内し、架空の価格や候補市場へのAPI通信は発生させません。
 
 ## 設計上の工夫
 
