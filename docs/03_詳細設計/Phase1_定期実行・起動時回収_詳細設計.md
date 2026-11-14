@@ -1,10 +1,10 @@
 # 機能D：定期実行・起動時回収の詳細設計
 
-更新：2026-11-09。D-02の実装後、ユーザーの依頼でD-03「Spring標準Schedulerへの移行」を実施。起動時回収・周期・停止の合意は維持する。現行構成と結果は末尾を参照。
+更新：2026-11-14。Spring ThreadPoolTaskSchedulerとSmartLifecycleによる現行設計。起動時回収・周期・停止を制御する。末尾には標準基盤を選択した理由を残す。
 
 ## 目的・対象範囲
 
-既存のCollectionService.collectBtcUsdを自動実行し、開始前に前回残存したRUNNINGを回収する。単一バックエンドプロセスを前提とする。価格検証・保存の基本動作、2参照API、DBスキーマは維持する。
+既存のCollectionService.collectBtcUsdを自動実行し、開始前に前回残存したRUNNINGを回収する。単一バックエンドプロセスを前提とする。価格検証・保存の基本動作、参照API、DBスキーマは維持する。
 
 ## 合意済みの動作
 
@@ -48,7 +48,7 @@ Spring Boot起動・Flyway適用
 | CollectionPersistenceService.recoverInterruptedRuns(): int | 短い@Transactional内でUTCの検出時刻を小数秒6桁へ切捨て、Repositoryを呼び、更新件数を返す |
 | CollectionRunRepositoryの回収メソッド | status=RUNNINGだけを一括更新。INTERRUPTED・検出時刻・result_code=INTERRUPTEDを設定し、finished_at=null。その他の状態と観測は変更しない |
 
-既存CollectionService、Client/Mapperの取得・保存・エラー分類の基本動作は再実装しない。今回の追加により「アプリ起動後の自動収集」が初めて有効になる。
+既存CollectionService、Client/Mapperの取得・保存・エラー分類の基本動作は再実装しない。実行開始の入口はこのRunnerに集約する。
 
 ## 起動・Tx・失敗時の境界
 
@@ -106,11 +106,11 @@ Flyway・JPA初期化
 
 実装後は、回収→初回→周期継続、停止順序、異常系が合意どおりに動き、各試験とユーザーのコード確認が完了したことをもって機能DのDoneを判断する。
 
-## 現在地
+## 検証状態
 
-D-03のSpring標準Scheduler移行を実装。通常テスト200件成功、DB結合51件成功を更新レポートで確認した（既存50件の実行＋追加D-DB-05の個別実行1件）。合計251件成功、失敗・エラー・スキップ0。2026-11-09にユーザーから業務コード・テスト観点の確認完了を受領した。設計・実装・自動テスト・読解レビューの開発工程は完了。開発アプリでの手動確認・システム全体のST/E2Eは未確認として機能⑥へ引き継ぎ、次は機能⑤のVue業務画面設計へ進む。
+実装と自動テストは完了。[CIの最新確認結果](../05_テスト/CIの実行と確認.md)を参照。本番の定期収集・計画停止/再開は確認済み。実行中の収集を狙った強制停止・本番での終了順序試験は[ST/UAT記録](../05_テスト/本番配信・ST_UAT確認.md)で未確認として区別する。
 
-## D-03 Spring標準Schedulerへの移行（2026-11-09）
+## 参考：Spring標準Schedulerを選択した理由
 
 ### 変更前後のクラス構成
 
@@ -183,12 +183,12 @@ Context.close
 
 ### テストと保証範囲
 
-- 通常200件成功（失敗・エラー・スキップ0）。Dの内訳はRunner5・設定11・Scheduler10・実Springライフサイクル7の計33件。
+- Runner・設定・Scheduler・実Springライフサイクルを通常試験で検証する。最新の全体件数はCI記録に集約する。
 - 既存29件の観点は維持し、終了イベントのUTはSmartLifecycleの自動起動禁止・停止phase・停止callbackの観点へ置き換えた。削除/無効化による成功扱いはしていない。
 - 追加4件：Spring境界でもErrorを伝播、Boot全体設定の混入防止、実Context.closeでの超過/追加待機なし、実Bootでの回収後初回実行。実スレッドはThreadPoolTaskSchedulerを使用する。
-- DB結合の既存50件はユーザー環境のXMLレポートで成功確認。D-DB-05を追加し全対象51件。実MySQL/実HikariDataSource/実Spring Schedulerを使い、停止待機中のSELECT成功と完了後のプール破棄を確認する。追加1件は2026-11-09 16:38更新レポートでケース名と成功・失敗/エラー/スキップ0を確認した。既存50件は同日16:33更新レポートで確認済み。個別実行でCollectionPersistenceITのXMLが1件分へ置き換わっているため、現ディレクトリの件数合計と累計51件を混同しない。
+- D-DB-05は実MySQL・実HikariDataSource・実Spring Schedulerで、停止待機中のSELECT成功と完了後のプール破棄を確認する。全対象の実行結果はCI記録を参照。
 - 開発用DB・実Coinbaseはテストで使用しない。機能A/B/C、回収処理、トランザクション境界、application.yml、Flywayは変更前後のハッシュでも同一を確認した。
-- 未確認：OS/IntelliJからの強制プロセス停止、実Coinbase収集と画面までを通すST/E2E。変更後コードのユーザー読解は2026-11-09に完了報告を受領済み。通常のSpringコンテキスト終了と区別する。
+- 自動試験は実CoinbaseやOSからの強制プロセス終了を含まない。通常のSpringコンテキスト終了と区別する。
 
 ### 変更ファイル
 
