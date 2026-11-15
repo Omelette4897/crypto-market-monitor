@@ -8,16 +8,16 @@ Java / Spring Bootを中心としたWebアプリケーション開発のキャ�
 
 デモは停止する場合があります。停止中は収集されず、再開後も欠測を補間しません。画面の更新は保存済みデータの再取得です。
 
-![PC版：Coinbase BTC-USDの最新価格・24時間推移・スプレッド統計](assets/screenshots/dashboard-desktop.png)
+![PC版：Coinbase BTC-USDの最新価格・24時間推移・スプレッド統計](assets/screenshots/dashboard-desktop.jpg)
 
 <details>
 <summary>スマートフォン表示</summary>
 
-<img src="assets/screenshots/dashboard-mobile.png" alt="スマートフォン版：市場一覧・最新価格・推移チャート" width="375">
+<img src="assets/screenshots/dashboard-mobile.jpg" alt="スマートフォン版：市場一覧・最新価格・推移チャート" width="375">
 
 </details>
 
-撮影：2026-11-14。公開アプリの実データで、価格・観測件数は撮影時点のものです。
+撮影：2026-11-15。公開アプリの実データで、価格・観測件数は撮影時点のものです。
 
 ## 主な機能
 
